@@ -1,0 +1,18 @@
+{
+    "name": "lithephp/swisshelper",
+    "description": "Lithe SwissHelper is a comprehensive PHP utility library designed to simplify common programming tasks. It provides a collection of helper functions for string manipulation, array handling, data validation, and more, all designed with a focus on developer experience and code readability.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "files": [
+            "src/SwissHelper.php"
+        ]
+    },
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
