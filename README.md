@@ -264,7 +264,7 @@ $token = csrf_token();
 ```php
 $field = csrf_field();
 // Output: <input type="hidden" name="_token" value="your_csrf_token_here">
-
+```
 
 ## Contributing
 
