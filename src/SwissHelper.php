@@ -98,137 +98,6 @@ if (!function_exists('arr')) {
     }
 }
 
-if (!function_exists('money')) {
-    /**
-     * Format monetary values
-     * 
-     * @param float|int $value Amount to format
-     * @param string $currency Currency code (ISO 4217)
-     * @param array $options Formatting options
-     * @return string
-     */
-    function money($value, $currency = 'USD', array $options = [])
-    {
-        // Currency configurations
-        $currencies = [
-            'USD' => [
-                'symbol' => '$',
-                'position' => 'before',
-                'decimal' => '.',
-                'thousands' => ',',
-                'decimals' => 2,
-                'template' => '{symbol}{value}'
-            ],
-            'EUR' => [
-                'symbol' => '€',
-                'position' => 'after',
-                'decimal' => ',',
-                'thousands' => '.',
-                'decimals' => 2,
-                'template' => '{value}{symbol}'
-            ],
-            'GBP' => [
-                'symbol' => '£',
-                'position' => 'before',
-                'decimal' => '.',
-                'thousands' => ',',
-                'decimals' => 2,
-                'template' => '{symbol}{value}'
-            ],
-            'JPY' => [
-                'symbol' => '¥',
-                'position' => 'before',
-                'decimal' => '.',
-                'thousands' => ',',
-                'decimals' => 0,
-                'template' => '{symbol}{value}'
-            ],
-            'CNY' => [
-                'symbol' => '¥',
-                'position' => 'before',
-                'decimal' => '.',
-                'thousands' => ',',
-                'decimals' => 2,
-                'template' => '{symbol}{value}'
-            ],
-            'BRL' => [
-                'symbol' => 'R$',
-                'position' => 'before',
-                'decimal' => ',',
-                'thousands' => '.',
-                'decimals' => 2,
-                'template' => '{symbol} {value}'
-            ],
-            'INR' => [
-                'symbol' => '₹',
-                'position' => 'before',
-                'decimal' => '.',
-                'thousands' => ',',
-                'decimals' => 2,
-                'template' => '{symbol}{value}'
-            ],
-            'RUB' => [
-                'symbol' => '₽',
-                'position' => 'after',
-                'decimal' => ',',
-                'thousands' => ' ',
-                'decimals' => 2,
-                'template' => '{value}{symbol}'
-            ],
-            'AUD' => [
-                'symbol' => 'A$',
-                'position' => 'before',
-                'decimal' => '.',
-                'thousands' => ',',
-                'decimals' => 2,
-                'template' => '{symbol}{value}'
-            ],
-            'CAD' => [
-                'symbol' => 'CA$',
-                'position' => 'before',
-                'decimal' => '.',
-                'thousands' => ',',
-                'decimals' => 2,
-                'template' => '{symbol}{value}'
-            ],
-            'AOA' => [
-                'symbol' => 'Kz',
-                'position' => 'before',
-                'decimal' => ',',
-                'thousands' => '.',
-                'decimals' => 2,
-                'template' => '{symbol} {value}'
-            ]
-        ];
-
-        // Get currency configuration or use USD as default
-        $config = $currencies[$currency] ?? $currencies['USD'];
-
-        // Merge with custom options
-        $config = array_merge($config, $options);
-
-        // Format the number according to currency configuration
-        $formatted = number_format(
-            $value,
-            $config['decimals'],
-            $config['decimal'],
-            $config['thousands']
-        );
-
-        // Return only the number if no symbol is needed
-        if (isset($options['symbol']) && $options['symbol'] === false) {
-            return $formatted;
-        }
-
-        // Apply template
-        return str_replace(
-            ['{symbol}', '{value}'],
-            [$config['symbol'], $formatted],
-            $config['template']
-        );
-    }
-}
-
 if (!function_exists('mask')) {
     function mask($value, $mask)
     {
@@ -424,5 +293,147 @@ if (!function_exists('url')) {
                 return $_SERVER['HTTP_REFERER'] ?? $this->base();
             }
         };
+    }
+}
+
+
+if (!function_exists('session')) {
+    function session()
+    {
+
+        /**
+         * Component responsible for managing session.
+         */
+        return new class
+        {
+            /**
+             * Set a session variable.
+             *
+             * @param string $name Name of the session variable.
+             * @param mixed $value Value to be assigned to the session variable.
+             */
+            public static function put($name, $value)
+            {
+                self::checkSessionActive();
+                $_SESSION[$name] = $value;
+            }
+
+            /**
+             * Get the value of a session variable.
+             *
+             * @param string $name Name of the session variable.
+             * @param mixed $default Default value to return if the session variable is not set.
+             * @return mixed Value of the session variable or the default value if not set.
+             */
+            public static function get($name, $default = null)
+            {
+                self::checkSessionActive();
+                return $_SESSION[$name] ?? $default;
+            }
+
+            /**
+             * Unset a specific session variable or multiple session variables.
+             *
+             * @param mixed $name Name(s) of the session variable(s) to unset. Can be a string or an array of strings.
+             */
+            public static function forget($name)
+            {
+                self::checkSessionActive();
+
+                if (is_array($name)) {
+                    foreach ($name as $item) {
+                        unset($_SESSION[$item]);
+                    }
+                } elseif (is_string($name)) {
+                    unset($_SESSION[$name]);
+                } else {
+                    throw new \InvalidArgumentException('The parameter should be a string or an array of strings.');
+                }
+            }
+
+            /**
+             * Destroy session variables if a session is active.
+             */
+            public static function destroy()
+            {
+                self::checkSessionActive();
+                session_unset();
+                session_destroy();
+            }
+
+            /**
+             * Check if the session is active.
+             *
+             * @return bool
+             */
+            public static function isActive()
+            {
+                return session_status() === PHP_SESSION_ACTIVE;
+            }
+
+            /**
+             * Get all session variables.
+             *
+             * @return array Associative array of all session variables.
+             */
+            public static function all()
+            {
+                self::checkSessionActive();
+                return $_SESSION;
+            }
+
+            /**
+             * Check if session variables exist.
+             *
+             * @param string|array $names The name or names of the session variables.
+             * @return bool True if all session variables exist, false otherwise.
+             */
+            public static function has(string|array $names)
+            {
+                self::checkSessionActive();
+
+                if (is_array($names)) {
+                    foreach ($names as $name) {
+                        if (!isset($_SESSION[$name])) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+                return isset($_SESSION[$names]);
+            }
+
+            /**
+             * Check if the session is active.
+             *
+             * @throws RuntimeException If the session is not active.
+             */
+            private static function checkSessionActive()
+            {
+                if (!self::isActive()) {
+                    throw new RuntimeException('Session is not active.');
+                }
+            }
+        };
+    }
+}
+
+// CSRF token helper
+if (!function_exists('csrf_token')) {
+    function csrf_token(string $name = '_token')
+    {
+        $token = session()->get($name);
+
+        return $token;
+    }
+}
+
+// CSRF field helper
+if (!function_exists('csrf_field')) {
+    function csrf_field(string $name)
+    {
+        $token = htmlspecialchars(csrf_token($name), ENT_QUOTES, 'UTF-8');
+        return '<input type="hidden" name="_token" value="' . $token . '">';
     }
 }

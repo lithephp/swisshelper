@@ -116,36 +116,6 @@ $except = arr($array)->except(['age']);
 // Output: ['name' => 'John', 'email' => 'john@example.com']
 ```
 
-### Money Helper (money)
-
-The money helper formats monetary values according to different currency standards.
-
-```php
-// Basic formatting
-echo money(1234.56); // "$1,234.56"
-echo money(1234.56, 'EUR'); // "1.234,56€"
-echo money(1234.56, 'BRL'); // "R$ 1.234,56"
-
-// Custom formatting options
-echo money(1234.56, 'USD', [
-    'decimals' => 0,
-    'symbol' => false
-]); // "1,235"
-
-// Supported currencies
-// USD - United States Dollar
-// EUR - Euro
-// GBP - British Pound
-// JPY - Japanese Yen
-// CNY - Chinese Yuan
-// BRL - Brazilian Real
-// INR - Indian Rupee
-// RUB - Russian Ruble
-// AUD - Australian Dollar
-// CAD - Canadian Dollar
-// AOA - Angolan Kwanza
-```
-
 ### Validation Helper (validate)
 
 The validation helper provides methods for validating different types of data.
@@ -191,96 +161,110 @@ validate('1234567890123456')->creditCard(); // false
 
 #### Password Validation
 ```php
-validate('Abc123!@#')->password(
-    minLength: 8,
-    requireSpecial: true,
-    requireNumber: true,
-    requireUpper: true,
-    requireLower: true
-); // true
+// Validate password strength
+validate('P@ssw0rd')->password(); // true
+validate('weak')->password(); // false
 
-// Customize requirements
-validate('simple123')->password(
-    minLength: 6,
-    requireSpecial: false,
-    requireUpper: false
-); // true
+// Custom rules
+validate('1234Abcd!')->password(8, false, true, true, true); // true
 ```
 
 #### Age Validation
 ```php
-validate('1990-01-01')->age(min: 18, max: 65); // true
-validate('2020-01-01')->age(min: 18); // false
+// Check if age is within a range
+validate('2000-01-01')->age(18, 60); // true
+validate('2010-01-01')->age(18); // false
 ```
 
-#### Other Validations
+#### Value Length Validation
 ```php
-// Between validation
-validate('test')->between(2, 5); // true (string length)
-validate(10)->between(1, 100); // true (numeric value)
+// Check if string or numeric value is between limits
+validate('Hello')->between(3, 10); // true
+validate(100)->between(50, 150); // true
+```
 
-// Contains validation
+#### String Search Validation
+```php
+// Check if string contains a specific substring
 validate('Hello World')->contains('World'); // true
 
-// Starts/Ends With validation
-validate('Hello World')->startsWith('Hello'); // true
-validate('Hello World')->endsWith('World'); // true
-
-// Integer validation
-validate('123')->int(); // true
-validate('12.3')->int(); // false
+// Check if string starts or ends with specific text
+validate('example.com')->startsWith('example'); // true
+validate('example.com')->endsWith('.com'); // true
 ```
 
 ### Random String Generator (random)
 
-The random helper generates random strings with different characteristics.
+The `random()` function generates random strings of various types.
 
 ```php
-// Default (16 characters, alphanumeric)
-echo random(); // "a1B2c3D4e5F6g7H8"
+// Generate a random alphanumeric string of 16 characters
+$alnum = random(16);
 
-// Specific length
-echo random(8); // "Xa4Kp9Yz"
+// Generate a random alphabetic string of 10 characters
+$alpha = random(10, 'alpha');
 
-// Only letters
-echo random(8, 'alpha'); // "AbCdEfGh"
+// Generate a random numeric string of 8 characters
+$numeric = random(8, 'numeric');
 
-// Only numbers
-echo random(6, 'numeric'); // "123456"
-
-// Numbers without zero
-echo random(4, 'nozero'); // "1234"
+// Generate a random non-zero numeric string of 6 characters
+$nozero = random(6, 'nozero');
 ```
 
 ### URL Helper (url)
 
-The URL helper provides methods for URL manipulation and generation.
+The URL helper provides methods for handling URLs.
 
 ```php
-// Get current URL
-echo url()->current();
-// Output: "https://example.com/current/path"
+// Get the current URL
+$current = url()->current();
 
-// Get base URL
-echo url()->base();
-// Output: "https://example.com"
+// Get the base URL
+$base = url()->base();
 
-// Generate URL
-echo url()->to('products/1');
-// Output: "https://example.com/products/1"
+// Generate a URL to a specific path
+$path = url()->to('path/to/resource');
 
-// Get previous URL
-echo url()->previous();
-// Output: Returns the previous URL or base URL if not available
+// Get the previous URL (referer)
+$previous = url()->previous();
 ```
 
-## Testing
+### Session Helper (session)
 
-The package includes a comprehensive test suite. To run the tests:
+The session helper provides methods for managing session data.
 
-```bash
-composer test
+```php
+// Set a session variable
+session()->put('key', 'value');
+
+// Get a session variable
+$value = session()->get('key');
+
+// Check if a session variable exists
+$exists = session()->has('key');
+
+// Get all session variables
+$all = session()->all();
+
+// Unset a session variable
+session()->forget('key');
+
+// Destroy the session
+session()->destroy();
 ```
+
+### CSRF Helpers
+
+#### CSRF Token
+```php
+$token = csrf_token();
+```
+
+#### CSRF Hidden Field
+```php
+$field = csrf_field();
+// Output: <input type="hidden" name="_token" value="your_csrf_token_here">
+
 
 ## Contributing
 
@@ -291,19 +275,6 @@ Contributions are welcome and will be fully credited. Please follow these steps:
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-### Coding Standards
-
-This package follows PSR-12 coding standards. Ensure your code adheres to these standards:
-
-```bash
-composer check-style
-composer fix-style
-```
-
-## Security
-
-If you discover any security-related issues, please email security@yourdomain.com instead of using the issue tracker.
 
 ## License
 
